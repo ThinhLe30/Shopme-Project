@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace = "fragments :: page_head(${pageTitle},'none')">
+<body>
+	<div class="container-fluid">
+		<div th:replace= "navigation :: menu"></div>
+		<div>
+			<h2>Manage Users | [[${pageTitle}]]</h2>
+		</div>
+
+		<form th:object="${user}" th:action="@{/users/save}" method="POST"
+			style="max-width: 700px; margin: 0 auto"
+			onsubmit="return checkEmailUnique(this);"
+			enctype="multipart/form-data">
+			<input type="hidden" th:field="*{id}">
+			<div class="border border-secondary rounded p-3">
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label" for="email">E-mail:</label>
+					<div>
+						<input type="email" class="form-control" id="email"
+							th:field="*{email}" required minlength="8" maxlength="128"
+							size="52">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label" for="firstName">First
+						Name:</label>
+					<div>
+						<input type="text" class="form-control" id="firstName"
+							th:field="*{firstName}" required minlength="2" maxlength="45" size="52">
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label" for="lastName">Last
+						Name:</label>
+					<div>
+						<input type="text" class="form-control" id="lastName"
+							th:field="*{lastName}" required minlength="2" maxlength="45" size="52">
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label" for="password">Password:</label>
+					<div>
+						<input th:if="${user.id} == null" type="password"
+							class="form-control" id="password" th:field="*{password}"
+							required minlength="8" maxlength="20" size="52"> <input
+							th:if="${user.id} != null" type="password" class="form-control"
+							id="password" th:field="*{password}" minlength="8" maxlength="20"
+							placeholder="leave blank if you dont wanna change" size="52">
+					</div>
+				</div>
+
+
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">Roles:</label>
+					<div class="col-sm-8">
+						<th:block th:each="role : ${listRoles}">
+							<input type="checkbox" th:field="*{roles}" th:text="${role.name}"
+								th:value=${role.id} class="m-2"> - 
+							<small>[[${role.description}]]</small>
+							<br>
+						</th:block>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label" for="enable">Enabled:</label>
+					<div>
+						<input type="checkbox" class="form-control" id="enable"
+							th:field="*{enable}">
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label" for="enable">Photos:</label>
+					<div>
+						<input type="hidden" th:field="*{photos}"> <input
+							type="file" id="fileImage" accept="image/png image/jpeg"
+							class="mb-2" name="image">
+						<div class="text-center">
+							<img alt="Photos preview" th:src="@{${user.photosImagePath}}"
+								id="thumbnail" class="img-fluid">
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="text-center">
+					<input type="submit" value="Save" class="btn btn-primary m-3">
+					<input type="button" value="Cancel" class="btn btn-secondary"
+						id="cancel">
+				</div>
+			</div>
+
+		</form>
+		
+		<div th:replace = "fragment_modal :: modal_dialog"></div>
+		
+		<div th:replace = "fragments :: footer"></div>
+	</div>
+	<script type="text/javascript">
+		moduleURL ="[[@{/users}]]";
+		function checkEmailUnique(form) {
+			url = "[[@{/users/check_email}]]";
+			userEmail = $("#email").val();
+			userId = $("#id").val();
+			csrfValue = $("input[name ='_csrf']").val();
+			params = {
+				id : userId,
+				email : userEmail,
+				_csrf : csrfValue
+			}
+			$.post(
+					url,
+					params,
+					function(response) {
+						if (response == "Ok") {
+							form.submit();
+						} else if (response == "Duplicated") {
+							showWarningModal("There is another user having the email "
+									+ userEmail + ". Choose another!");
+						} else {
+							showErrorModal("Unknow response from server");
+						}
+					}).fail(function() {
+						showErrorModal("Could'nt connect to the server");
+			});
+			return false;
+		}
+
+	</script>
+	<script th:src="@{/js/common_form.js}"></script>
+</body>
+</html>

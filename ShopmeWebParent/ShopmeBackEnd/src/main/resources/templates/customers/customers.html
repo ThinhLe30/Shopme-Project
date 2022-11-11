@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace = "fragments :: page_head('Customers - Shopme Admin','none')">
+<body>
+	<div class="container-fluid">
+		<div th:replace= "navigation :: menu"></div>
+		<div>
+			<h2>Manage Customers</h2>
+		</div>
+
+				<div th:replace = "fragments :: search_form('/customers/page/1')"></div>
+		<div class="full-details">
+			<table
+				class="table table-bordered table-striped table-hover table-responsive-xl">
+				<thead class="thead-dark">
+					<tr>
+						<th th:replace = "fragments :: column_link2('/customers','id','ID','none')"/>
+						<th th:replace = "fragments :: column_link2('/customers','firstName','First Name','none')"/>
+						<th th:replace = "fragments :: column_link2('/customers','lastName','Last Name','none')"/>
+						<th th:replace = "fragments :: column_link2('/customers','email','E-mail','none')"/>
+						<th th:replace = "fragments :: column_link2('/customers','city','City','none')"/>
+						<th th:replace = "fragments :: column_link2('/customers','state','State','none')"/>
+						<th th:replace = "fragments :: column_link2('/customers','country','Country','none')"/>
+						<th th:replace = "fragments :: column_link2('/customers','enabled','State','none')"/>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="customer : ${customers}">
+						<td>[[${customer.id}]]</td>
+						<td>[[${customer.firstName}]]</td>
+						<td>[[${customer.lastName}]]</td>
+						<td>[[${customer.email}]]</td>
+						<td>[[${customer.city}]]</td>
+						<td>[[${customer.state}]]</td>
+						<td>[[${customer.country.name}]]</td>
+						<td> <div th:replace="fragments :: status(${customer.enabled},'customer','/customers/' + ${customer.id})"></div></td>
+						<td>
+							<a class="fas fa-file-alt fa-2x icon-green link-detail"
+								th:href="@{'/customers/detail/'+ ${customer.id}}"
+								title="View details of this customer">
+							</a>
+							&nbsp;
+							<div th:replace="fragments :: edit('customer','/customers/edit/' + ${customer.id})"></div>
+							&nbsp;
+							<div th:replace="fragments :: delete(${customer.id},'customer','/customers/delete/'+${customer.id},true)"></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div th:replace ="fragments :: pagination('/customers','Customers')"></div>
+
+		<!-- here  -->	
+		<div class="modal fade text-center" id="confirmModal">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">Delete Confirmation</h4>
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+					</div>
+					<div class="modal-body">
+						<span id="confirmText"></span>
+					</div>
+
+					<div class="modal-footer">
+						<a class="btn btn-success" href="" id="yesButton">Yes</a>
+						<button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class = "modal fade" id="detailModal">
+			<div class ="modal-dialog modal-xl">
+				<div class = "modal-content">
+				</div>
+			</div>
+		</div>
+		<div th:replace = "fragments :: footer"></div>
+	</div>
+	<script type="text/javascript">
+	moduleURL = "[[@{/customers}]]"
+		function clearFilter() {
+		window.location = "[[@{/customers}]]"
+		}
+		$(document).ready(
+				function() {
+					$(".link-delete").on(
+							"click",
+							function(e) {
+								e.preventDefault();
+								customerId = $(this).attr("entityId");
+								$("#yesButton").attr("href",
+										$(this).attr("href"));
+								$("#confirmText").text(
+										"Are you sure you want to delete this customer ID "
+												+ customerId + "?");
+								$("#confirmModal").modal();
+							});
+					$(".link-detail").on("click", function(e){
+								e.preventDefault();
+								linkDetailURL = $(this).attr("href");
+								$("#detailModal").modal("show").find(".modal-content").load(linkDetailURL);
+					});
+				});
+	</script>
+</body>
+</html>
